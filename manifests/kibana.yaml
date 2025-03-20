@@ -7,6 +7,16 @@ metadata:
 spec:
   version: 8.17.3
   count: 1
+  http:
+    service:
+      spec:
+        type: NodePort
+        ports:
+          - name: https
+            port: 5601
+            protocol: TCP
+            nodePort: 30080
+            targetPort: 5601
   elasticsearchRef:
     name: elasticsearch-quickstart
   config:
@@ -16,6 +26,8 @@ spec:
       - name: system
         version: latest
       - name: elastic_agent
+        version: latest
+      - name: falco
         version: latest
       - name: fleet_server
         version: latest
@@ -46,3 +58,26 @@ spec:
             id: system-1
             package:
               name: system
+          - name: falco-1
+            id: falco-1
+            package:
+              name: falco
+            inputs:
+              - type: tcp
+                enabled: true
+                streams:
+                  - enabled: true
+                    data_stream:
+                      type: logs
+                      dataset: falco.alerts
+                    vars:
+                      - name: listen_address
+                        value: "0.0.0.0"
+                      - name: listen_port
+                        value: 9030
+                      - name: preserve_original_event
+                        value: false
+                      - name: preserve_falco_fields
+                        value: false
+              - type: logfile
+                enabled: false

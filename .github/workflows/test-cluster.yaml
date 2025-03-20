@@ -12,13 +12,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Helm
+      - name: Setup Helm
         uses: azure/setup-helm@v4.2.0
         with:
           version: v3.17.0
+      
+      - name: Add Falco Helm Repo
+        run: |
+          helm repo add falcosecurity https://falcosecurity.github.io/charts
+          helm repo update
 
       - name: Create Kind Cluster
-        uses: helm/kind-action@v1
+        uses: helm/kind-action@v1.12.0
+        with:
+          config: kind-config.yaml
 
       - name: Install Elastic Operator
         run: |
@@ -48,3 +55,16 @@ jobs:
           kubectl wait --timeout 1220s --for='jsonpath={.status.phase}=Ready' elasticsearches.elasticsearch.k8s.elastic.co/elasticsearch-quickstart
           kubectl wait --timeout 1220s --for='jsonpath={.status.health}=green' agents.agent.k8s.elastic.co/elastic-agent-quickstart
           kubectl wait --timeout 1220s --for='jsonpath={.status.health}=green' agents.agent.k8s.elastic.co/fleet-server-quickstart
+
+      - name: Install Falco
+        run: |
+          helm install falco falcosecurity/falco \
+            --set falcosidekick.enabled=true \
+            --set falcosidekick.config.syslog.host=agent-syslog \
+            --set falcosidekick.config.syslog.port=9030
+
+      - name: Wait for Falco
+        run: kubectl wait --for=condition=Ready pod -l 'app.kubernetes.io/instance=falco'
+
+      - name: Wait arbitrarily
+        run: sleep infinity
