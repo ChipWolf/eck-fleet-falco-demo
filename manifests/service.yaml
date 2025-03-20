@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-syslog
+  namespace: default
+spec:
+  ports:
+  - name: syslog
+    port: 9030
+    protocol: TCP
+    targetPort: 9030
+  selector:
+    common.k8s.elastic.co/type: agent
+  type: ClusterIP

@@ -1,0 +1,47 @@
+---
+apiVersion: agent.k8s.elastic.co/v1alpha1
+kind: Agent
+metadata:
+  name: fleet-server-quickstart
+  namespace: default
+spec:
+  version: 8.17.3
+  kibanaRef:
+    name: kibana-quickstart
+  elasticsearchRefs:
+  - name: elasticsearch-quickstart
+  mode: fleet
+  fleetServerEnabled: true
+  policyID: eck-fleet-server
+  deployment:
+    replicas: 1
+    podTemplate:
+      spec:
+        serviceAccountName: elastic-agent
+        automountServiceAccountToken: true
+        securityContext:
+          runAsUser: 0 
+---
+apiVersion: agent.k8s.elastic.co/v1alpha1
+kind: Agent
+metadata:
+  name: elastic-agent-quickstart
+  namespace: default
+spec:
+  version: 8.17.3
+  kibanaRef:
+    name: kibana-quickstart
+  fleetServerRef:
+    name: fleet-server-quickstart
+  mode: fleet
+  policyID: eck-agent
+  daemonSet:
+    podTemplate:
+      spec:
+        serviceAccountName: elastic-agent
+        automountServiceAccountToken: true
+        securityContext:
+          runAsUser: 0 
+        volumes:
+        - name: agent-data
+          emptyDir: {}
