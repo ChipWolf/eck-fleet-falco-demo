@@ -58,10 +58,7 @@ jobs:
 
       - name: Install Falco
         run: |
-          helm install falco falcosecurity/falco \
-            --set falcosidekick.enabled=true \
-            --set falcosidekick.config.syslog.host=agent-syslog \
-            --set falcosidekick.config.syslog.port=9030
+          helm install falco falcosecurity/falco -f falco/values.yaml
 
       - name: Wait for Falco
         run: kubectl wait --for=condition=Ready pod -l 'app.kubernetes.io/instance=falco'
