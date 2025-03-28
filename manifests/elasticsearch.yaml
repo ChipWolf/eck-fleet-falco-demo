@@ -5,7 +5,7 @@ metadata:
   name: elasticsearch-quickstart
   namespace: default
 spec:
-  version: 8.17.3
+  version: 8.15.3
   nodeSets:
   - name: default
     count: 3
